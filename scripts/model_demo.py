@@ -12,8 +12,10 @@ import re
 
 st.set_page_config(page_title="Job Role Classifier Demo", layout="centered")
 
-MODEL_PATH = "../data/role_classifier.pkl"
-VECTORIZER_PATH = "../data/tfidf_vectorizer.pkl"
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(SCRIPT_DIR, "..", "data", "role_classifier.pkl")
+VECTORIZER_PATH = os.path.join(SCRIPT_DIR, "..", "data", "tfidf_vectorizer.pkl")
 
 
 @st.cache_resource
@@ -63,7 +65,6 @@ def main():
 
         st.success(f"**Predicted Role:** {prediction.title()}")
 
-        # Show decision confidence if the model supports probability/decision scores
         if hasattr(model, "decision_function"):
             scores = model.decision_function(vec)[0]
             classes = model.classes_

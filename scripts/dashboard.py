@@ -9,7 +9,9 @@ from collections import Counter
 
 st.set_page_config(page_title="Job Market Skill Analyzer", layout="wide")
 
-INPUT_PATH = "../data/cleaned_jobs.csv"
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+INPUT_PATH = os.path.join(SCRIPT_DIR, "..", "data", "cleaned_jobs.csv")
 
 # ---- Edit this to match your real skillset ----
 MY_SKILLS = [
@@ -46,17 +48,15 @@ def main():
 
     st.divider()
 
-    # --- Top skills overall ---
     st.subheader("Top Skills Overall")
     counts, total = get_skill_counts(df)
     top_skills_df = pd.DataFrame(counts.most_common(15), columns=["Skill", "Count"])
     top_skills_df["% of postings"] = (top_skills_df["Count"] / total * 100).round(1)
     st.bar_chart(top_skills_df.set_index("Skill")["Count"])
-    st.dataframe(top_skills_df, width="stretch")
+    st.dataframe(top_skills_df, use_container_width=True)
 
     st.divider()
 
-    # --- Skills by role ---
     st.subheader("Top Skills by Role")
     role = st.selectbox("Select role", df["search_role"].unique())
     role_counts, role_total = get_skill_counts(df, role)
@@ -66,24 +66,21 @@ def main():
 
     st.divider()
 
-    # --- Top locations ---
     st.subheader("Top Locations by Demand")
     loc_counts = df["location"].value_counts().head(10)
     st.bar_chart(loc_counts)
 
     st.divider()
 
-    # --- Salary insights ---
     st.subheader("Salary Insights (limited disclosed data)")
     salaried = df.dropna(subset=["salary_min", "salary_max"])
     st.caption(f"Based on {len(salaried)} of {len(df)} postings that disclosed salary — not fully representative.")
     if len(salaried) > 0:
         salary_summary = salaried.groupby("search_role")[["salary_min", "salary_max"]].mean().round(0)
-        st.dataframe(salary_summary, width="stretch")
+        st.dataframe(salary_summary, use_container_width=True)
 
     st.divider()
 
-    # --- Skill gap ---
     st.subheader("Your Skill Gap Analysis")
     top_15 = [s for s, _ in counts.most_common(15)]
     have = [s for s in top_15 if s in MY_SKILLS]
